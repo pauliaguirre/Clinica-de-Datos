@@ -1,0 +1,22 @@
+---
+title: "Clase 1"
+author: "Paula Aguirre"
+date: "2024-08-22"
+output: html_document
+---
+
+```{r}
+suaci_2011 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2011.csv", sep = ";")
+```
+
+```{r}
+suaci_2024 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2024.csv", sep = ",", encoding = "latin1")
+```
+
+```{r}
+suaci_2023 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2023.csv", sep = ",", header = F, skip = 1, encoding = "latin1")
+```
+
+```{r}
+suaci_2022 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2022.csv", sep = ",", encoding = "latin1")
+```
