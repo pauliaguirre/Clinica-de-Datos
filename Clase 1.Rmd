@@ -4,21 +4,83 @@ author: "Paula Aguirre"
 date: "2024-08-22"
 output: html_document
 ---
-
 ```{r}
-suaci_2011 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2011.csv", sep = ";")
+install.packages("janitor")
+library(tidyverse)
+library(readxl)
+```
+cargo los datasets
+```{r}
+suaci_2021 <-  read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/sistema-unico-de-atencion-ciudadana-2021.csv",
+                        sep = ";",
+                        encoding = "latin1")
+
+suaci_2022 <-  read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/sistema-unico-de-atencion-ciudadana-2022.csv",
+                        sep = ";",
+                        encoding = "latin1")
+
+suaci_2023 <- read_xlsx("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/sistema-unico-de-atencion-ciudadana-2023.xlsx")
+
+suaci_2024 <- read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/sistema-unico-de-atencion-ciudadana-2024.csv",
+                       sep = ",",
+                       encoding = "latin1")
+```
+normalizo los nombres de las columnas para despues poder unir todos los dataset en uno solo
+```{r}
+suaci_2022_clean <- suaci_2022 %>%
+  select(-subcategoria,-fecha_cierre_contacto)
+
+suaci_2021_clean <- suaci_2021 %>%
+  select(-subcategoria,-fecha_cierre_contacto)
+
+suaci_2021_clean <- suaci_2021_clean %>%
+  rename(domicilio_calle = domiclio_calle)
+
+suaci_2023_rename <- suaci_2023 %>%
+  rename(contacto = NRO_SOLICITUD,
+         periodo = PERIODO,
+         categoria = CATEGORIA,
+         prestacion =PRESTACION,
+         tipo_prestacion =TIPO,
+         fecha_ingreso = FECHA_INGRESO,
+         hora_ingreso = HORA_INGRESO,
+         domicilio_comuna = COMUNA,
+         domicilio_barrio = BARRIO,
+         domicilio_calle = CALLE,
+         domicilio_altura = ALTURA,
+         domicilio_esquina_proxima = ESQUINA_PROXIMA,
+         lat = X,
+         lon = Y,
+         genero = GENERO,
+         estado_del_contacto = ESTADO_GENERAL,
+         canal = CANAL)
+
+suaci_2024_rename <- suaci_2024 %>%
+  rename(contacto = nro_solicitud,
+         periodo = periodo,
+         categoria = categoria,
+         prestacion =prestacion,
+         tipo_prestacion =tipo,
+         fecha_ingreso = fecha_ingreso,
+         hora_ingreso = hora_ingreso,
+         domicilio_comuna = comuna,
+         domicilio_barrio = barrio,
+         domicilio_calle = calle,
+         domicilio_altura = altura,
+         domicilio_esquina_proxima = esquina_proxima,
+         lat = lat,
+         lon = long,
+         genero = genero,
+         estado_del_contacto = estado_general,
+         canal = canal)
+
+colnames(suaci_2021_clean)
+suaci_2021_clean <- suaci_2021_clean[,c(1,2,3,4,5,6,7,8,9,10,11,12,15,14,13,16,17)]
 ```
 
 ```{r}
-suaci_2024 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2024.csv", sep = ",", encoding = "latin1")
+suaci_21_24 <- rbind(suaci_2024_rename,suaci_2023_rename)
+suaci_21_24 <- rbind(suaci_21_24, suaci_2022_clean)
+suaci_21_24 <- rbind(suaci_21_24, suaci_2021_clean)
 ```
 
-```{r}
-suaci_2023 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2023.csv", sep = ",", header = F, skip = 1, encoding = "latin1")
-```
-
-```{r}
-suaci_2022 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2022.csv", sep = ",", encoding = "latin1")
-```
-
-test test
