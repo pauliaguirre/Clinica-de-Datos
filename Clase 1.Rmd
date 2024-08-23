@@ -20,3 +20,5 @@ suaci_2023 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos
 ```{r}
 suaci_2022 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2022.csv", sep = ",", encoding = "latin1")
 ```
+
+test
