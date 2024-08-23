@@ -5,9 +5,9 @@ date: "2024-08-22"
 output: html_document
 ---
 ```{r}
-install.packages("janitor")
 library(tidyverse)
 library(readxl)
+library(lubridate)
 ```
 cargo los datasets
 ```{r}
@@ -23,7 +23,7 @@ suaci_2023 <- read_xlsx("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/des
 
 suaci_2024 <- read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/sistema-unico-de-atencion-ciudadana-2024.csv",
                        sep = ",",
-                       encoding = "latin1")
+                       encoding = "UTF-8")
 ```
 normalizo los nombres de las columnas para despues poder unir todos los dataset en uno solo
 ```{r}
@@ -83,4 +83,44 @@ suaci_21_24 <- rbind(suaci_2024_rename,suaci_2023_rename)
 suaci_21_24 <- rbind(suaci_21_24, suaci_2022_clean)
 suaci_21_24 <- rbind(suaci_21_24, suaci_2021_clean)
 ```
+hora de preparar los datos para crear visualizaciones
+```{r}
+#primero unificamos los nombres de las comunas para que sea posible agrupar
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '1'] <- 'COMUNA 1'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '2'] <- 'COMUNA 2'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '3'] <- 'COMUNA 3'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '4'] <- 'COMUNA 4'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '5'] <- 'COMUNA 5'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '6'] <- 'COMUNA 6'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '7'] <- 'COMUNA 7'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '8'] <- 'COMUNA 8'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '9'] <- 'COMUNA_9'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '10'] <- 'COMUNA 10'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '11'] <- 'COMUNA 11'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '12'] <- 'COMUNA 12'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '13'] <- 'COMUNA 13'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '14'] <- 'COMUNA 14'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '15'] <- 'COMUNA 15'
+
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_1'] <- 'COMUNA 1'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_2'] <- 'COMUNA 2'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_3'] <- 'COMUNA 3'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_4'] <- 'COMUNA 4'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_5'] <- 'COMUNA 5'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_6'] <- 'COMUNA 6'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_7'] <- 'COMUNA 7'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_8'] <- 'COMUNA 8'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_9'] <- 'COMUNA_9'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_10'] <- 'COMUNA 10'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_11'] <- 'COMUNA 11'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_12'] <- 'COMUNA 12'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_13'] <- 'COMUNA 13'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_14'] <- 'COMUNA 14'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_15'] <- 'COMUNA 15'
+#cambiamos la columna tipo_prestacion para que este todo en minusculas y se haga bien el groupby posteriormente
+suaci_21_24$tipo_prestacion <- tolower(suaci_21_24$tipo_prestacion)
+```
+
+
+
 
