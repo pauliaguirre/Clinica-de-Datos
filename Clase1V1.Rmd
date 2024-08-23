@@ -1,0 +1,89 @@
+---
+title: "Clase 1"
+author: "Paula Aguirre, Valentina Cuevas, Matías Dominguez, Marco Curcio, Stefano Salmeri"
+date: "2024-08-22"
+output: html_document
+---
+
+# **DOCUMENTACIÓN PASO A PASO**
+
+## 1. Procedemos a incorporar las librerías y  seleccionar las bases de datos de los años 2022, 2023 y 2024. Las bases de 2022 y 2024 son en formato .csv, mientras que la base de 2023 es en formato .xlsx.
+
+```{r}
+library(readxl)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+suaci_2024 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2024.csv", sep = ",", encoding = "latin1")
+```
+
+```{r}
+suaci_2022 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2022.csv", sep = ";", encoding = "latin1")
+```
+
+```{r}
+suaci_2023 <- read_xlsx("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2023.xlsx")
+```
+
+## 2. Procedemos a analizar cada base de datos.
+
+En el año 2022 se registran 104.912 registros, con 19 columnas.
+
+En el año 2023 se registran 831.373 registros, con 17 columnas. 
+
+En el año 2024 se registran 492.236 registros, con 17 columnas. 
+
+```{r}
+dim(suaci_2022)
+dim(suaci_2023)
+dim(suaci_2024)
+```
+En el año 2022 las variables tienen información que refiere a:  
+
+```{r}
+names(suaci_2022)
+```
+En el año 2023 las variables tienen información que refiere a:   
+
+```{r}
+names(suaci_2023)
+```
+En el año 2024 las variables tienen información que refiere a:  
+```{r}
+names(suaci_2024)
+```
+A continuación un muestreo de lo que contiene cada base de datos:
+
+```{r}
+head(suaci_2022)
+```
+```{r}
+head(suaci_2023)
+```
+
+```{r}
+head(suaci_2024)
+```
+
+A continuación, un resumen estadístico de cada año.
+
+*2022*
+```{r}
+summary(suaci_2022)
+```
+*2023*
+```{r}
+summary(suaci_2023)
+```
+*2024*
+```{r}
+summary(suaci_2024)
+```
+
+
+## 3. Procedemos a renombrar las variables y cantidad de columnas tomando de referencia el primer año "2022", para generar uniformidad en la exposición de información.
+
