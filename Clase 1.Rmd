@@ -1,22 +1,145 @@
 ---
 title: "Clase 1"
-author: "Paula Aguirre"
+author: "Paula Aguirre, Valentina Cuevas, Matías Dominguez, Marco Curcio, Stefano Salmeri"
 date: "2024-08-22"
 output: html_document
 ---
 
+# **DOCUMENTACIÓN PASO A PASO**
+
+## 1. Procedemos a incorporar las librerías y  seleccionar las bases de datos de los años 2022, 2023 y 2024 del siguiente enlace: https://data.buenosaires.gob.ar/dataset/sistema-unico-atencion-ciudadana 
+
+(Las bases de 2022 y 2024 son en formato .csv, mientras que la base de 2023 es en formato .xlsx)
+
 ```{r}
-suaci_2011 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2011.csv", sep = ";")
+library(readxl)
 ```
 
 ```{r}
-suaci_2024 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2024.csv", sep = ",", encoding = "latin1")
+library(tidyverse)
+```
+```{r}
+library(knitr)
+library(kableExtra)
 ```
 
 ```{r}
-suaci_2023 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2023.csv", sep = ",", header = F, skip = 1, encoding = "latin1")
+suaci_2024 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2024.csv", sep = ",", stringsAsFactors = TRUE, encoding = "latin1")
 ```
 
 ```{r}
-suaci_2022 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2022.csv", sep = ",", encoding = "latin1")
+suaci_2022 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2022.csv", sep = ";", stringsAsFactors = TRUE ,encoding = "latin1")
 ```
+
+```{r}
+suaci_2021 <- read.csv("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2021.csv", sep = ";", stringsAsFactors = TRUE ,encoding = "latin1")
+```
+
+```{r}
+suaci_2023 <- read_xlsx("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/sistema-unico-de-atencion-ciudadana-2023.xlsx")
+```
+
+## 2. Procedemos a analizar cada base de datos.
+
+En el año 2021 se registran 754.638 reclamos, con 19 columnas. 
+
+En el año 2022 se registran 104.912 reclamos, con 19 columnas. Cabe destacar que el año 2022 sólo registra información del primer trimestre (hasta fecha 13 de marzo).
+
+En el año 2023 se registran 831.373 reclamos, con 17 columnas. 
+
+En el año 2024 se registran 492.236 reclamos, con 17 columnas. 
+
+```{r}
+dim(suaci_2021)
+dim(suaci_2022)
+dim(suaci_2023)
+dim(suaci_2024)
+```
+En el año 2021 las variables tienen información que refiere a: 
+
+```{r}
+names(suaci_2021)
+```
+
+En el año 2022 las variables tienen información que refiere a:  
+
+```{r}
+names(suaci_2022)
+```
+En el año 2023 las variables tienen información que refiere a:   
+
+```{r}
+names(suaci_2023)
+```
+En el año 2024 las variables tienen información que refiere a:  
+```{r}
+names(suaci_2024)
+```
+Se puede observar que a partir del año 2023 la base de datos se encuentra con 2 columnas menos, habiéndose eliminado las referentes a "sub-categoría" y "fecha cierre contacto".
+
+A continuación un muestreo de lo que contiene cada base de datos:
+
+*2021* 
+```{r}
+head(suaci_2021)
+```
+*2022*
+
+```{r}
+head(suaci_2022)
+```
+*2023*
+
+```{r}
+head(suaci_2023)
+```
+
+*2024*
+
+```{r}
+head(suaci_2024)
+```
+
+A continuación, un resumen estadístico de cada año.
+
+*2021*
+```{r}
+summary(suaci_2021)
+```
+
+
+
+*2022*
+```{r}
+summary(suaci_2022)
+```
+*2023*
+```{r}
+summary(suaci_2023)
+```
+*2024*
+```{r}
+summary(suaci_2024)
+```
+## 3. Procedemos a incorporar los mapas geoespaciales de la Ciudad Autónoma de Buenos Aires extraídos de la página  para obtener información de los barrios, comunas y la información censal por radio. 
+
+datos_geo <- st_read("data/partidos_amba.shp", #Ruta del archivo y nombre
+                         stringsAsFactors = TRUE, #True= texto como categoría, #False= como caracteres
+                         options = "ENCODING=UTF-8") #codificación del texto
+                         
+```{r}
+datos_barrio <- st_read("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/barrios.shp", stringAsFactors = TRUE, options = "ENCODING=UTF-8")
+```
+```{r}
+datos_comunas <- st_read("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/comunas.shp", stringAsFactors = TRUE, options = "ENCODING=UTF-8")
+```                       
+```{r}
+datos_comunas <- st_read("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/comunas.shp", stringAsFactors = TRUE, options = "ENCODING=UTF-8")
+``` 
+
+```{r}
+datos_ICR <- st_read("C:/Users/Paula/Desktop/Clinica de Datos/Clinica-de-Datos/data/informacion_censal_por_radio_2010_wgs84.shp"), stringAsFactors = TRUE, options = "ENCODING=UTF-8")
+```
+
+## 4. Procedemos a renombrar las variables y cantidad de columnas tomando de referencia el primer año "2022", para generar uniformidad en la exposición de información.
+
