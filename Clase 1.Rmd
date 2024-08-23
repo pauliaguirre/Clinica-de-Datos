@@ -121,6 +121,3 @@ suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_15'] <- 'CO
 suaci_21_24$tipo_prestacion <- tolower(suaci_21_24$tipo_prestacion)
 ```
 
-
-
-
