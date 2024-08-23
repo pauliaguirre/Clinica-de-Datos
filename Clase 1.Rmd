@@ -8,6 +8,7 @@ output: html_document
 library(tidyverse)
 library(readxl)
 library(lubridate)
+library(sf)
 ```
 cargo los datasets
 ```{r}
@@ -24,6 +25,10 @@ suaci_2023 <- read_xlsx("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/des
 suaci_2024 <- read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/sistema-unico-de-atencion-ciudadana-2024.csv",
                        sep = ",",
                        encoding = "UTF-8")
+
+comunas_sf <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/comunas.shp")
+
+radio_censal <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/informacion_censal_por_radio_2010_wgs84.shp")
 ```
 normalizo los nombres de las columnas para despues poder unir todos los dataset en uno solo
 ```{r}
@@ -74,7 +79,17 @@ suaci_2024_rename <- suaci_2024 %>%
          estado_del_contacto = estado_general,
          canal = canal)
 
-colnames(suaci_2021_clean)
+comunas_sf <- comunas_sf %>%
+  rename(domicilio_comuna = comuna) 
+
+radio_censal <- radio_censal %>%
+  rename(domicilio_comuna = COMUNA) 
+
+radio_censal <- radio_censal %>%
+  st_drop_geometry()%>%
+  group_by(domicilio_comuna) %>%
+  summarise(total = sum(TOTAL_POB))
+
 suaci_2021_clean <- suaci_2021_clean[,c(1,2,3,4,5,6,7,8,9,10,11,12,15,14,13,16,17)]
 ```
 
@@ -94,7 +109,7 @@ suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '5'] <- 'COMUNA 5'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '6'] <- 'COMUNA 6'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '7'] <- 'COMUNA 7'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '8'] <- 'COMUNA 8'
-suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '9'] <- 'COMUNA_9'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '9'] <- 'COMUNA 9'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '10'] <- 'COMUNA 10'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '11'] <- 'COMUNA 11'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '12'] <- 'COMUNA 12'
@@ -110,14 +125,94 @@ suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_5'] <- 'COM
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_6'] <- 'COMUNA 6'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_7'] <- 'COMUNA 7'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_8'] <- 'COMUNA 8'
-suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_9'] <- 'COMUNA_9'
+suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_9'] <- 'COMUNA 9'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_10'] <- 'COMUNA 10'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_11'] <- 'COMUNA 11'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_12'] <- 'COMUNA 12'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_13'] <- 'COMUNA 13'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_14'] <- 'COMUNA 14'
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == 'COMUNA_15'] <- 'COMUNA 15'
+
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '1'] <- 'COMUNA 1'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '2'] <- 'COMUNA 2'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '3'] <- 'COMUNA 3'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '4'] <- 'COMUNA 4'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '5'] <- 'COMUNA 5'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '6'] <- 'COMUNA 6'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '7'] <- 'COMUNA 7'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '8'] <- 'COMUNA 8'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '9'] <- 'COMUNA 9'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '10'] <- 'COMUNA 10'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '11'] <- 'COMUNA 11'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '12'] <- 'COMUNA 12'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '13'] <- 'COMUNA 13'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '14'] <- 'COMUNA 14'
+comunas_sf$domicilio_comuna[comunas_sf$domicilio_comuna == '15'] <- 'COMUNA 15'
+
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '1'] <- 'COMUNA 1'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '2'] <- 'COMUNA 2'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '3'] <- 'COMUNA 3'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '4'] <- 'COMUNA 4'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '5'] <- 'COMUNA 5'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '6'] <- 'COMUNA 6'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '7'] <- 'COMUNA 7'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '8'] <- 'COMUNA 8'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '9'] <- 'COMUNA 9'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '10'] <- 'COMUNA 10'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '11'] <- 'COMUNA 11'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '12'] <- 'COMUNA 12'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '13'] <- 'COMUNA 13'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '14'] <- 'COMUNA 14'
+radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '15'] <- 'COMUNA 15'
+
 #cambiamos la columna tipo_prestacion para que este todo en minusculas y se haga bien el groupby posteriormente
 suaci_21_24$tipo_prestacion <- tolower(suaci_21_24$tipo_prestacion)
+suaci_21_24$prestacion <- tolower(suaci_21_24$prestacion)
+```
+primero, analizamos cual es reclamo que mas veces fue realizado en el periodo
+```{r}
+#agrupamos por prestacion, ordenamos para ver los casos con mayor incidencias y contamos. Al ver que hay patrones repetidos vamos a tener que agrupar los que son similares para que no se cuenten por separado
+suaci_21_24$prestacion[suaci_21_24$prestacion == "retiro de escombros/restos de obra"] <- "retiro de escombros / restos de obra"
+suaci_21_24$prestacion[suaci_21_24$prestacion == "retiro de restos de poda o jardinería domiciliaria"] <- "retiro de restos de jardinería domiciliaria"
+
+prestacion <- suaci_21_24 %>%
+  group_by(prestacion) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10)
+```
+verificamos cuantas denuncias de vehiculos mal estacionados hay por comuna
+```{r}
+reclamos_comuna <- suaci_21_24 %>%
+  filter(prestacion == "vehículo mal estacionado"&
+          domicilio_comuna != "") %>%
+  group_by(domicilio_comuna) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  left_join(comunas_sf, by = "domicilio_comuna")
+
+
+```
+verificamos cual es el canal de denuncias mas utilizado para reclamar por vehiculos mal estacionados
+```{r}
+reclamos_canal <- suaci_21_24 %>%
+  filter(prestacion == "vehículo mal estacionado") %>%
+  group_by(canal) %>%
+  count() %>%
+  arrange(desc(n))
+```
+vemos la proporcion de denuncias respecto a densidad poblacional
+```{r}
+denuncias_poblacion <- suaci_21_24 %>%
+  group_by(domicilio_comuna) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  left_join(radio_censal, by = "domicilio_comuna") %>%
+  left_join(comunas_sf, by = "domicilio_comuna") %>%
+  mutate(ratio = n/total)
+
+denuncias_poblacion_clean <- denuncias_poblacion %>%
+  select(domicilio_comuna,n,total,ratio) %>%
+  drop_na() 
 ```
 
