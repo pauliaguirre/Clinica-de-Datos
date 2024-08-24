@@ -223,6 +223,51 @@ reclamos_comuna <- suaci_21_24 %>%
 
 
 ```
+##analizamos la distribucion mensual de los casos
+```{r}
+mes_suaci_2021 <- suaci_2021 %>%
+  mutate(fecha_ingreso = as.Date(fecha_ingreso)) %>%
+  mutate(mes = month(fecha_ingreso, label = T)) %>%
+  group_by(mes) %>%
+  count() %>%
+  ggplot(aes(x = mes, y = n, fill = "blue")) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill='transparent'), 
+        plot.background = element_rect(fill='transparent', color=NA), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        legend.background = element_rect(fill='transparent'),
+        legend.box.background = element_rect(fill='transparent')) 
+
+ggsave('mes_suaci_2021.png',
+      mes_suaci_2021,
+      bg='transparent',
+      width = 16, 
+      height = 10)
+
+mes_suaci_2022 <- suaci_2022 %>%
+  mutate(fecha_ingreso = as.Date(fecha_ingreso)) %>%
+  mutate(mes = month(fecha_ingreso, label = T)) %>%
+  group_by(mes) %>%
+  count() %>%
+  ggplot(aes(x = mes, y = n, fill = "blue")) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill='transparent'), 
+        plot.background = element_rect(fill='transparent', color=NA), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        legend.background = element_rect(fill='transparent'),
+        legend.box.background = element_rect(fill='transparent')) 
+
+ggsave('mes_suaci_2022.png',
+      mes_suaci_2022,
+      bg='transparent',
+      width = 16, 
+      height = 10)
+```
+
 ##8 Verificamos cual es el canal de denuncias mas utilizado para reclamar por vehiculos mal estacionados
 ```{r}
 reclamos_canal <- suaci_21_24 %>%
@@ -354,6 +399,17 @@ p <- ggplot(suaci_hora, aes(x=as.factor(hora), y=n)) +
 
 p
 ```
+
+```{r}
+top_comuna <- suaci_21_24 %>%
+  group_by(domicilio_comuna,prestacion) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  drop_na()
+top_comuna <- top_comuna[!duplicated(top_comuna$domicilio_comuna),]
+
+```
+
 Mapas para visualizar la cantidad de denuncias por comuna
 ```{r}
 mapa_denuncias_total <- ggplot() +
@@ -384,6 +440,15 @@ mapa_denuncias_ratio <- ggplot() +
         axis.text = element_blank(),
         axis.ticks = element_blank())
 
-mapa_denuncias_ratio
-mapa_denuncias_total
+ggsave('denuncias_total.png',
+      mapa_denuncias_total,
+      bg='transparent',
+      width = 16, 
+      height = 10)
+
+ggsave('denuncias_ratio.png',
+      mapa_denuncias_ratio,
+      bg='transparent',
+      width = 16, 
+      height = 10)
 ```
