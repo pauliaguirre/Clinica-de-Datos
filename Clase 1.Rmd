@@ -9,10 +9,11 @@ library(tidyverse)
 library(readxl)
 library(lubridate)
 library(sf)
-library(networkD3)
-library(osmdata)
+library(ggmap)
+library(tidygeocoder)
 ```
-cargo los datasets
+## 1. Procedemos a incorporar las librerías y  seleccionar las bases de datos de los años 2022, 2023 y 2024. Las bases de 2022 y 2024 son en formato .csv, mientras que la base de 2023 es en formato .xlsx. Tambien cargo datasets de radios censales de las comunas para poder crear mapas
+
 ```{r}
 suaci_2021 <-  read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/sistema-unico-de-atencion-ciudadana-2021.csv",
                         sep = ";",
@@ -31,10 +32,35 @@ suaci_2024 <- read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desa
 comunas_sf <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/comunas.shp")
 
 radio_censal <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/informacion_censal_por_radio_2010_wgs84.shp")
-
-estacionamientos <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/estacionamientos-concesionados-de-movilidad-sustentable.shp")
 ```
-normalizo los nombres de las columnas para despues poder unir todos los dataset en uno solo
+exploramos brevemente los datasets
+```{r}
+dim(suaci_2022)
+dim(suaci_2023)
+dim(suaci_2024)
+
+names(suaci_2022)
+names(suaci_2023)
+names(suaci_2024)
+
+head(suaci_2022)
+head(suaci_2023)
+head(suaci_2024)
+
+summary(suaci_2022)
+summary(suaci_2023)
+summary(suaci_2024)
+
+```
+## 2. Procedemos a analizar cada base de datos.
+
+En el año 2022 se registran 104.912 registros, con 19 columnas.
+
+En el año 2023 se registran 831.373 registros, con 17 columnas. 
+
+En el año 2024 se registran 492.236 registros, con 17 columnas.
+
+## 3. Procedemos a renombrar las variables y cantidad de columnas tomando de referencia el primer año "2022", para generar uniformidad en la exposición de información.
 ```{r}
 suaci_2022_clean <- suaci_2022 %>%
   select(-subcategoria,-fecha_cierre_contacto)
@@ -96,13 +122,13 @@ radio_censal <- radio_censal %>%
 
 suaci_2021_clean <- suaci_2021_clean[,c(1,2,3,4,5,6,7,8,9,10,11,12,15,14,13,16,17)]
 ```
-
+##4 unimos los datasets para poder trabajar mejor los datos
 ```{r}
 suaci_21_24 <- rbind(suaci_2024_rename,suaci_2023_rename)
 suaci_21_24 <- rbind(suaci_21_24, suaci_2022_clean)
 suaci_21_24 <- rbind(suaci_21_24, suaci_2021_clean)
 ```
-hora de preparar los datos para crear visualizaciones
+## normalizamos los nombres de las comunas y otras variables relevantes
 ```{r}
 #primero unificamos los nombres de las comunas para que sea posible agrupar
 suaci_21_24$domicilio_comuna[suaci_21_24$domicilio_comuna == '1'] <- 'COMUNA 1'
@@ -173,7 +199,7 @@ radio_censal$domicilio_comuna[radio_censal$domicilio_comuna == '15'] <- 'COMUNA 
 suaci_21_24$tipo_prestacion <- tolower(suaci_21_24$tipo_prestacion)
 suaci_21_24$prestacion <- tolower(suaci_21_24$prestacion)
 ```
-primero, analizamos cual es reclamo que mas veces fue realizado en el periodo
+##6 Primero, analizamos cual es reclamo que mas veces fue realizado en el periodo
 ```{r}
 #agrupamos por prestacion, ordenamos para ver los casos con mayor incidencias y contamos. Al ver que hay patrones repetidos vamos a tener que agrupar los que son similares para que no se cuenten por separado
 suaci_21_24$prestacion[suaci_21_24$prestacion == "retiro de escombros/restos de obra"] <- "retiro de escombros / restos de obra"
@@ -185,7 +211,7 @@ prestacion <- suaci_21_24 %>%
   arrange(desc(n)) %>%
   head(10)
 ```
-verificamos cuantas denuncias de vehiculos mal estacionados hay por comuna
+##7 Verificamos cuantas denuncias de vehiculos mal estacionados hay por comuna
 ```{r}
 reclamos_comuna <- suaci_21_24 %>%
   filter(prestacion == "vehículo mal estacionado"&
@@ -197,7 +223,7 @@ reclamos_comuna <- suaci_21_24 %>%
 
 
 ```
-verificamos cual es el canal de denuncias mas utilizado para reclamar por vehiculos mal estacionados
+##8 Verificamos cual es el canal de denuncias mas utilizado para reclamar por vehiculos mal estacionados
 ```{r}
 reclamos_canal <- suaci_21_24 %>%
   filter(prestacion == "vehículo mal estacionado") %>%
@@ -205,7 +231,7 @@ reclamos_canal <- suaci_21_24 %>%
   count() %>%
   arrange(desc(n))
 ```
-vemos la proporcion de denuncias respecto a densidad poblacional
+##9 Vemos la proporcion de denuncias respecto a densidad poblacional
 ```{r}
 denuncias_poblacion <- suaci_21_24 %>%
   group_by(domicilio_comuna) %>%
@@ -219,7 +245,7 @@ denuncias_poblacion_clean <- denuncias_poblacion %>%
   select(domicilio_comuna,n,total,ratio) %>%
   drop_na() 
 ```
-calculamos los tops de denuncias por año 
+##10 Calculamos los tops de denuncias por año 
 ```{r}
 denuncias_2021 <- suaci_21_24 %>%
   filter(grepl(2021, periodo)) %>%
@@ -256,7 +282,7 @@ denuncias_2024 <- suaci_21_24 %>%
   rename("2024" = n)  %>%
   left_join(denuncias_2023, by = "prestacion")
 ```
-calculamos los tops de canales de denuncia por ano
+##11 Calculamos los tops de canales de denuncia por año
 ```{r}
 canal_2021 <- suaci_21_24 %>%
   filter(grepl(2021, periodo)) %>%
@@ -293,8 +319,8 @@ canal_2024 <- suaci_21_24 %>%
   rename("2024" = n) %>%
   left_join(canal_2023, by = "canal")
 ```
-
-plot prueba
+##Anexo pruebas
+Plot prueba para visualizar las horas de mayor actividad en formato circular.
 ```{r}
 suaci_hora_am <- suaci_21_24 %>%
   filter(prestacion == "vehículo mal estacionado"&
@@ -309,15 +335,10 @@ suaci_hora <- suaci_hora_am %>%
 
 label_data <- suaci_hora
  
-# calculate the ANGLE of the labels
 number_of_bar <- nrow(label_data)
-angle <-  90 - 360 * (label_data$hora-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
- 
-# calculate the alignment of labels: right or left
-# If I am on the left part of the plot, my labels have currently an angle < -90
+angle <-  90 - 360 * (label_data$hora-0.5) /number_of_bar
 label_data$hjust<-ifelse( angle < -90, 1, 0)
  
-# flip angle BY to make them readable
 label_data$angle<-ifelse(angle < -90, angle+180, angle)
 
 p <- ggplot(suaci_hora, aes(x=as.factor(hora), y=n)) +
@@ -328,13 +349,41 @@ p <- ggplot(suaci_hora, aes(x=as.factor(hora), y=n)) +
   theme(
     axis.title = element_blank(),
     panel.grid = element_blank(),
-    plot.margin = unit(rep(-1,4), "cm")      # Adjust the margin to make in sort labels are not truncated!
+    plot.margin = unit(rep(-1,4), "cm") 
   ) 
 
 p
 ```
-primero hacemos un mapa para mostrar la cantidad de denuncias por comuna
+Mapas para visualizar la cantidad de denuncias por comuna
 ```{r}
-mapa_denuncias_comuna <- 
-```
+mapa_denuncias_total <- ggplot() +
+  geom_sf(data = denuncias_poblacion$geometry,
+          aes(fill = denuncias_poblacion$n), color = NA)+
+  scale_fill_viridis_c("Denuncias totales", direction = -1) +
+  theme(legend.position = "right",
+        panel.background = element_rect(fill='transparent'), 
+        plot.background = element_rect(fill='transparent', color=NA), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        legend.background = element_rect(fill='transparent'),
+        legend.box.background = element_rect(fill='transparent'),
+        axis.text = element_blank(),
+        axis.ticks = element_blank()) 
 
+mapa_denuncias_ratio <- ggplot() +
+  geom_sf(data = denuncias_poblacion$geometry,
+          aes(fill = denuncias_poblacion$ratio), color = NA)+
+  scale_fill_viridis_c("Denuncias por habitante", direction = -1)  +
+  theme(legend.position = "right",
+        panel.background = element_rect(fill='transparent'), 
+        plot.background = element_rect(fill='transparent', color=NA), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        legend.background = element_rect(fill='transparent'),
+        legend.box.background = element_rect(fill='transparent'),
+        axis.text = element_blank(),
+        axis.ticks = element_blank())
+
+mapa_denuncias_ratio
+mapa_denuncias_total
+```
