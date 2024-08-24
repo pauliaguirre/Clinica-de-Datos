@@ -9,6 +9,8 @@ library(tidyverse)
 library(readxl)
 library(lubridate)
 library(sf)
+library(networkD3)
+library(osmdata)
 ```
 cargo los datasets
 ```{r}
@@ -29,6 +31,8 @@ suaci_2024 <- read.csv("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desa
 comunas_sf <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/comunas.shp")
 
 radio_censal <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/informacion_censal_por_radio_2010_wgs84.shp")
+
+estacionamientos <- read_sf("C:/Users/alejo/OneDrive/Escritorio/clinica_de_datos/desafio/datasets/estacionamientos-concesionados-de-movilidad-sustentable.shp")
 ```
 normalizo los nombres de las columnas para despues poder unir todos los dataset en uno solo
 ```{r}
@@ -214,5 +218,123 @@ denuncias_poblacion <- suaci_21_24 %>%
 denuncias_poblacion_clean <- denuncias_poblacion %>%
   select(domicilio_comuna,n,total,ratio) %>%
   drop_na() 
+```
+calculamos los tops de denuncias por año 
+```{r}
+denuncias_2021 <- suaci_21_24 %>%
+  filter(grepl(2021, periodo)) %>%
+  group_by(prestacion) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10) %>%
+  rename("2021" = n)
+
+denuncias_2022 <- suaci_21_24 %>%
+  filter(grepl(2022, periodo)) %>%
+  group_by(prestacion) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10) %>%
+  rename("2022" = n) %>%
+  left_join(denuncias_2021, by = "prestacion")
+
+denuncias_2023 <- suaci_21_24 %>%
+  filter(grepl(2023, periodo)) %>%
+  group_by(prestacion) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10)  %>%
+  rename("2023" = n)  %>%
+  left_join(denuncias_2022, by = "prestacion")
+
+denuncias_2024 <- suaci_21_24 %>%
+  filter(grepl(2024, periodo)) %>%
+  group_by(prestacion) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10)  %>%
+  rename("2024" = n)  %>%
+  left_join(denuncias_2023, by = "prestacion")
+```
+calculamos los tops de canales de denuncia por ano
+```{r}
+canal_2021 <- suaci_21_24 %>%
+  filter(grepl(2021, periodo)) %>%
+  group_by(canal) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10) %>%
+  rename("2021" = n)
+
+canal_2022 <- suaci_21_24 %>%
+  filter(grepl(2022, periodo)) %>%
+  group_by(canal) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10)  %>%
+  rename("2022" = n) %>%
+  left_join(canal_2021, by = "canal")
+
+canal_2023 <- suaci_21_24 %>%
+  filter(grepl(2023, periodo)) %>%
+  group_by(canal) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10)  %>%
+  rename("2023" = n) %>%
+  left_join(canal_2022, by = "canal")
+
+canal_2024 <- suaci_21_24 %>%
+  filter(grepl(2024, periodo)) %>%
+  group_by(canal) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  head(10)  %>%
+  rename("2024" = n) %>%
+  left_join(canal_2023, by = "canal")
+```
+
+plot prueba
+```{r}
+suaci_hora_am <- suaci_21_24 %>%
+  filter(prestacion == "vehículo mal estacionado"&
+          grepl("am", hora_ingreso) ) %>%
+  mutate(hora_ingreso = strptime(hora_ingreso, format = "%H:%M:%S")) 
+
+
+suaci_hora <- suaci_hora_am %>% 
+  mutate(hora = hour(hora_ingreso)) %>%
+  group_by(hora) %>%
+  count()
+
+label_data <- suaci_hora
+ 
+# calculate the ANGLE of the labels
+number_of_bar <- nrow(label_data)
+angle <-  90 - 360 * (label_data$hora-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+ 
+# calculate the alignment of labels: right or left
+# If I am on the left part of the plot, my labels have currently an angle < -90
+label_data$hjust<-ifelse( angle < -90, 1, 0)
+ 
+# flip angle BY to make them readable
+label_data$angle<-ifelse(angle < -90, angle+180, angle)
+
+p <- ggplot(suaci_hora, aes(x=as.factor(hora), y=n)) +
+  geom_bar(stat="identity", fill=alpha("blue", 0.3)) +
+  coord_polar() +
+    geom_text(data=label_data, aes(x=hora, y=n+10, label=n, hjust=hjust), color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE ) + 
+    theme_minimal() +
+  theme(
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1,4), "cm")      # Adjust the margin to make in sort labels are not truncated!
+  ) 
+
+p
+```
+primero hacemos un mapa para mostrar la cantidad de denuncias por comuna
+```{r}
+mapa_denuncias_comuna <- 
 ```
 
